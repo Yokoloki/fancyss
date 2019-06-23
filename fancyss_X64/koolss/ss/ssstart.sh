@@ -567,11 +567,7 @@ start_sslocal(){
 		ssr-local $SPECIAL_ARG -l 23456 -c $CONFIG_FILE -u -f /var/run/sslocal1.pid >/dev/null 2>&1
 	elif  [ "$ss_basic_type" == "0" ];then
 		echo_date 开启ss-local，提供socks5端口：23456
-		if [ "$ss_basic_ss_obfs" == "0" ];then
-			ss-local $SPECIAL_ARG -l 23456 -c $CONFIG_FILE -u -f /var/run/sslocal1.pid >/dev/null 2>&1
-		else
-			ss-local $SPECIAL_ARG -l 23456 -c $CONFIG_FILE -u $ARG_OBFS -f /var/run/sslocal1.pid >/dev/null 2>&1
-		fi
+		ss-local $SPECIAL_ARG -l 23456 -c $CONFIG_FILE -u $ARG_OBFS -f /var/run/sslocal1.pid >/dev/null 2>&1
 	fi
 }
 
@@ -595,11 +591,7 @@ start_dns(){
 		elif  [ "$ss_basic_type" == "0" ];then
 			echo_date 开启ss-tunnel...
 			ss-tunnel -s $ss_basic_server -p $ss_basic_port -c $CONFIG_FILE -l $DNS_PORT -L "$ss_sstunnel_user" -u -f /var/run/sstunnel.pid >/dev/null 2>&1
-			if [ "$ss_basic_ss_obfs" == "0" ];then
-				ss-tunnel -s $ss_basic_server -p $ss_basic_port -c $CONFIG_FILE -l $DNS_PORT -L "$ss_sstunnel_user" -u -f /var/run/sstunnel.pid >/dev/null 2>&1
-			else
-				ss-tunnel -s $ss_basic_server -p $ss_basic_port -c $CONFIG_FILE -l $DNS_PORT -L "$ss_sstunnel_user" -u $ARG_OBFS -f /var/run/sstunnel.pid >/dev/null 2>&1
-			fi
+			ss-tunnel -s $ss_basic_server -p $ss_basic_port -c $CONFIG_FILE -l $DNS_PORT -L "$ss_sstunnel_user" -u $ARG_OBFS -f /var/run/sstunnel.pid >/dev/null 2>&1
 		fi
 	fi
 
@@ -978,11 +970,7 @@ start_ss_redir(){
 			ssr-redir $SPECIAL_ARG -c $CONFIG_FILE -f /var/run/koolss.pid >/dev/null 2>&1
 		elif  [ "$ss_basic_type" == "0" ];then
 			echo_date 开启ss-redir进程，用于透明代理.
-			if [ "$ss_basic_ss_obfs" == "0" ];then
-				ss-redir $SPECIAL_ARG -c $CONFIG_FILE -f /var/run/koolss.pid >/dev/null 2>&1
-			else
-				ss-redir $SPECIAL_ARG -c $CONFIG_FILE $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
-			fi
+			ss-redir $SPECIAL_ARG -c $CONFIG_FILE $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
 		fi
 		# ONLY UDP
 		if [ "$ss_basic_type" == "1" ];then
@@ -990,11 +978,7 @@ start_ss_redir(){
 			ssr-redir -c $CONFIG_FILE -U -f /var/run/koolss.pid >/dev/null 2>&1
 		elif  [ "$ss_basic_type" == "0" ];then
 			echo_date 开启ss-redir第二进程，用于kcp模式下udp的透明代理.
-			if [ "$ss_basic_ss_obfs" == "0" ];then
-				ss-redir -c $CONFIG_FILE -U -f /var/run/koolss.pid >/dev/null 2>&1
-			else
-				ss-redir -c $CONFIG_FILE -U $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
-			fi
+			ss-redir -c $CONFIG_FILE -U $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
 		fi
 	else
 		# Start ss-redir for nornal use
@@ -1003,11 +987,7 @@ start_ss_redir(){
 			ssr-redir $SPECIAL_ARG -c $CONFIG_FILE -u -f /var/run/koolss.pid >/dev/null 2>&1
 		elif  [ "$ss_basic_type" == "0" ];then
 			echo_date 开启ss-redir进程，用于透明代理.
-			if [ "$ss_basic_ss_obfs" == "0" ];then
-				ss-redir $SPECIAL_ARG -c $CONFIG_FILE -u -f /var/run/koolss.pid >/dev/null 2>&1
-			else
-				ss-redir $SPECIAL_ARG -c $CONFIG_FILE -u $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
-			fi
+			ss-redir $SPECIAL_ARG -c $CONFIG_FILE -u $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
 		fi
 	fi
 }
