@@ -25,11 +25,15 @@ ONSTART=`ps -l|grep $PPID|grep -v grep|grep "S99koolss"`
 #ONMWAN3=`ps -l|grep $PPID|grep -v grep|grep "mwan3.user"`
 #ONFIRES=`ps -l|grep $PPID|grep -v grep|grep "firewall includes"`
 
-# define SPECIAL_ARG when kcp enabled
+KCP_LOCAL_PORT=1091
+
+SS_KCP_ARGS=""
+SS_UDPSPEEDER_ARGS=""
 if [ "$ss_kcp_enable" == "1" ] && [ "$ss_kcp_node" == "$ss_basic_node" ];then
-	SPECIAL_ARG="-s 127.0.0.1 -p 11183"
-else
-	SPECIAL_ARG=""
+	SS_KCP_ARGS="-s 127.0.0.1 -p $KCP_LOCAL_PORT"
+	if [ -n $ss_basic_udpspeeder_port ] && [ "$ss_basic_udpspeeder_port" != "0" ]; then
+		SS_UDPSPEEDER_ARGS="-s 127.0.0.1 -p $ss_basic_udpspeeder_port"
+	fi
 fi
 
 #--------------------------------------------------------------------------
@@ -289,11 +293,12 @@ start_kcp(){
 		else
 			COMP=""
 		fi
+
 		echo_date 启动KCPTUN.
 		start-stop-daemon -S -q -b -m \
 		-p /tmp/run/kcp.pid \
 		-x /koolshare/bin/kcpclient \
-		-- -l 127.0.0.1:11183 \
+		-- -l 127.0.0.1:$KCP_LOCAL_PORT \
 		-r $ss_kcp_server:$ss_kcp_port \
 		--key $ss_kcp_password \
 		--crypt $ss_kcp_crypt \
@@ -563,11 +568,17 @@ start_haproxy(){
 
 start_sslocal(){
 	if [ "$ss_basic_type" == "1" ];then
-		echo_date 开启ssr-local，提供socks5端口：23456
-		ssr-local $SPECIAL_ARG -l 23456 -c $CONFIG_FILE -u -f /var/run/sslocal1.pid >/dev/null 2>&1
+		BIN="ssr-local"
 	elif  [ "$ss_basic_type" == "0" ];then
-		echo_date 开启ss-local，提供socks5端口：23456
-		ss-local $SPECIAL_ARG -l 23456 -c $CONFIG_FILE -u $ARG_OBFS -f /var/run/sslocal1.pid >/dev/null 2>&1
+		BIN="ss-local"
+	fi
+
+	echo_date 开启$BIN，提供socks5端口：23456
+	if [ -n "$SS_UDPSPEEDER_ARGS" ];then
+		$BIN $SS_KCP_ARGS -l 23456 -c $CONFIG_FILE -f /var/run/sslocal1.pid >/dev/null 2>&1
+		$BIN $SS_UDPSPEEDER_ARGS -l 23456 -c $CONFIG_FILE -U -f /var/run/sslocal1.pid >/dev/null 2>&1
+	else
+		$BIN $SS_KCP_ARGS -l 23456 -c $CONFIG_FILE -u -f /var/run/sslocal1.pid >/dev/null 2>&1
 	fi
 }
 
@@ -962,33 +973,23 @@ auto_start(){
 
 #=======================================================================================
 start_ss_redir(){
+	if [ "$ss_basic_type" == "1" ]; then
+		BIN=ssr-redir
+		ARG_OBFS=""
+	elif [ "$ss_basic_type" == "0" ]; then
+		BIN=ss-redir
+	fi
+
 	# start another ss-redir for udp when game mode under kcp enable
-	if [ "$ss_kcp_enable" == "1" ] && [ "$ss_kcp_node" == "$ss_basic_node" ] && [ "$mangle" == "1" ];then
-		# ONLY TCP
-		if [ "$ss_basic_type" == "1" ];then
-			echo_date 开启ssr-redir进程，用于透明代理.
-			ssr-redir $SPECIAL_ARG -c $CONFIG_FILE -f /var/run/koolss.pid >/dev/null 2>&1
-		elif  [ "$ss_basic_type" == "0" ];then
-			echo_date 开启ss-redir进程，用于透明代理.
-			ss-redir $SPECIAL_ARG -c $CONFIG_FILE $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
-		fi
-		# ONLY UDP
-		if [ "$ss_basic_type" == "1" ];then
-			echo_date 开启ssr-redir第二进程，用于kcp模式下udp的透明代理.
-			ssr-redir -c $CONFIG_FILE -U -f /var/run/koolss.pid >/dev/null 2>&1
-		elif  [ "$ss_basic_type" == "0" ];then
-			echo_date 开启ss-redir第二进程，用于kcp模式下udp的透明代理.
-			ss-redir -c $CONFIG_FILE -U $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
-		fi
+	if [ -n "$SS_UDPSPEEDER_ARGS" ]; then
+		echo_date 开启$BIN进程，用于tcp透明代理.
+		$BIN $SS_KCP_ARGS -c $CONFIG_FILE $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
+
+		echo_date 开启$BIN第二进程，用于kcp模式下udp的透明代理.
+		$BIN $SS_UDPSPEEDER_ARGS -c $CONFIG_FILE -U $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
 	else
-		# Start ss-redir for nornal use
-		if [ "$ss_basic_type" == "1" ];then
-			echo_date 开启ssr-redir进程，用于透明代理.
-			ssr-redir $SPECIAL_ARG -c $CONFIG_FILE -u -f /var/run/koolss.pid >/dev/null 2>&1
-		elif  [ "$ss_basic_type" == "0" ];then
-			echo_date 开启ss-redir进程，用于透明代理.
-			ss-redir $SPECIAL_ARG -c $CONFIG_FILE -u $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
-		fi
+		echo_date 开启$BIN进程，用于透明代理.
+		$BIN $SS_KCP_ARGS -c $CONFIG_FILE -u $ARG_OBFS -f /var/run/koolss.pid >/dev/null 2>&1
 	fi
 }
 
