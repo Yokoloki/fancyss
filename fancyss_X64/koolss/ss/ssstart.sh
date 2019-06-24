@@ -294,6 +294,11 @@ start_kcp(){
 			COMP=""
 		fi
 
+		if [ -n $ss_kcp_udp2raw_port ] && [ "$ss_kcp_udp2raw_port" != "0" ]; then
+			ss_kcp_server="127.0.0.1"
+			ss_kcp_port=$ss_kcp_udp2raw_port
+		fi
+
 		echo_date 启动KCPTUN.
 		start-stop-daemon -S -q -b -m \
 		-p /tmp/run/kcp.pid \

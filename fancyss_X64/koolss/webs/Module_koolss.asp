@@ -3201,7 +3201,7 @@
 			status_time = 999999990;
 			setTimeout("tabSelect('app11')", 500);
 			var kcp_chk = ["ss_kcp_enable", "ss_kcp_compon"];
-			var kcp_inp = ["ss_kcp_node", "ss_kcp_port", "ss_kcp_password", "ss_kcp_mode", "ss_kcp_crypt", "ss_kcp_mtu", "ss_kcp_sndwnd", "ss_kcp_rcvwnd", "ss_kcp_conn", "ss_kcp_config" ];
+			var kcp_inp = ["ss_kcp_node", "ss_kcp_port", "ss_kcp_password", "ss_kcp_mode", "ss_kcp_crypt", "ss_kcp_mtu", "ss_kcp_sndwnd", "ss_kcp_rcvwnd", "ss_kcp_conn", "ss_kcp_config", "ss_kcp_udp2raw_port" ];
 			// collect data from checkbox
 			for (var i = 0; i < kcp_chk.length; i++) {
 				dbus[kcp_chk[i]] = E('_' + kcp_chk[i] ).checked ? '1':'0';
@@ -3922,7 +3922,8 @@
 					{ title: '接收窗口 (--rcvwnd)', name:'ss_kcp_rcvwnd',type:'text',style:input_style, maxlen:5, value:dbus.ss_kcp_rcvwnd||"1024" },
 					{ title: '链接数 (--conn)', name:'ss_kcp_conn',type:'text',style:input_style, maxlen:4, value:dbus.ss_kcp_conn||"1" },
 					{ title: '关闭数据压缩 (--nocomp)', name:'ss_kcp_compon',type:'checkbox',style:input_style, maxlen:4, value:dbus.ss_kcp_compon == 1 },
-					{ title: '其它配置项', name:'ss_kcp_config',type:'text',style:"width:85%", value:dbus.ss_kcp_config }
+					{ title: '其它配置项', name:'ss_kcp_config',type:'text',style:"width:85%", value:dbus.ss_kcp_config },
+					{ title: 'UDP2Raw端口', name:'ss_kcp_udp2raw_port',type:'text',style:"width:85%", value:dbus.ss_kcp_udp2raw_port||"0" }
 				]);
 				
 				E('_ss_kcp_config').placeholder = "请将速度模式为manual的参数和其它参数依次填写进来";
